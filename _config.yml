@@ -19,6 +19,8 @@
 # in the templates via {{ site.myvariable }}.
 
 title: "TruongTX"
+url: "https://t0t0r0o.github.io"
+baseurl: "/writeups"
 description: "A collection of penetration testing writeups."
 theme: jekyll-theme-hacker
 author: TruongTX
