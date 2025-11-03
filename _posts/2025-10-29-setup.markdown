@@ -5,6 +5,7 @@ date:   2025-10-29 21:44:56 +0700
 categories: wordpress
 ---
 OS : Kali Linux
+
 Tải zip wordpress từ https://vi.wordpress.org/download/ sau đó giải nén file
 
 Tại cùng cấp thư mục /wordpress thực hiện tạo file docker composer
