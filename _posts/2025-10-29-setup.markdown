@@ -228,8 +228,10 @@ Sau khi cài đặt xong, truy cập [localhost:9000/wp-admin](http://localhost:
 
 ![image.png]({{ site.url }}/assets/images/setup/image.png)
 
-Thực hiện tải file File zip plugin theo đường dẫn : [https://downloads.wordpress.org/plugin/{plugin-slug}.{version](https://downloads.wordpress.org/plugin/%7Bplugin-slug%7D.%7Bversion)}.zip. 
+Thực hiện tải file zip plugin theo đường dẫn : [https://downloads.wordpress.org/plugin/{plugin-slug}.{version](https://downloads.wordpress.org/plugin/%7Bplugin-slug%7D.%7Bversion)}.zip. 
+
 Ví dụ : với plugin ninja-forms v3.11.0 ta sẽ thực hiện tải tại  [https://downloads.wordpress.org/plugin/ninja-forms.](https://downloads.wordpress.org/plugin/%7Bplugin-slug%7D.%7Bversion)3.11.0.zip
+
 Lưu ý: Chỉ các plugin miễn phí và được đăng tải lên trang chủ của wordpress mới có thể tải được bằng cách trên.
 
 Sau khi tải về file zip, truy cập plugin → cài plugin → Tải lên plugin dạng file zip để tiến hành cài đặt plugin. Sau khi cài đặt thành công, thực hiện kích hoạt plugin
