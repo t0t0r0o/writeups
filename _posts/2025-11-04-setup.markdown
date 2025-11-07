@@ -1,22 +1,23 @@
 ---
 layout: post
-title:  "Setup Wordpress"
+title:  "Setup WordPress"
 date:   2025-11-04 21:44:56 +0700
 categories: wordpress
 ---
-OS : Kali Linux
+OS: Kali Linux
 
-Tải zip wordpress từ https://vi.wordpress.org/download/ sau đó giải nén file
+Download the WordPress zip from https://vi.wordpress.org/download/ and extract it.
 
-Tại cùng cấp thư mục /wordpress thực hiện tạo file docker composer
+At the same level as the `/wordpress` folder, create the Docker Compose files and the WordPress files.
 
-```yaml
+Folder layout (example):
+
+```
 docker-compose.yml
 /wordpress:
   /wp-admin
   wp-config.php
   ...
-  
 ```
 
 docker-compose.yml
@@ -63,9 +64,9 @@ volumes:
 
 ```
 
-Tạo thêm file uploads.ini cùng cấp với docker-compose.yml
+Create an `uploads.ini` file next to your `docker-compose.yml`:
 
-```yaml
+```ini
 ; uploads.ini
 file_uploads = On
 memory_limit = 256M
@@ -74,174 +75,80 @@ post_max_size = 128M
 max_execution_time = 300
 ```
 
-trong thư mục wordpress cùng cấp, thay đổi file wp-config.php thành: 
+In the WordPress folder, update `wp-config.php` to read environment variables (example shown below). This file has been slightly modified to work with Docker by using environment variables when available.
 
-```yaml
+```php
 <?php
 /**
  * The base configuration for WordPress
- *
- * The wp-config.php creation script uses this file during the installation.
- * You don't have to use the website, you can copy this file to "wp-config.php"
- * and fill in the values.
- *
- * This file contains the following configurations:
- *
- * * Database settings
- * * Secret keys
- * * Database table prefix
- * * ABSPATH
- *
- * This has been slightly modified (to read environment variables) for use in Docker.
- *
- * @link https://developer.wordpress.org/advanced-administration/wordpress/wp-config/
- *
- * @package WordPress
  */
 
-// IMPORTANT: this file needs to stay in-sync with https://github.com/WordPress/WordPress/blob/master/wp-config-sample.php
-// (it gets parsed by the upstream wizard in https://github.com/WordPress/WordPress/blob/f27cb65e1ef25d11b535695a660e7282b98eb742/wp-admin/setup-config.php#L356-L392)
-
-// a helper function to lookup "env_FILE", "env", then fallback
+// helper function to lookup env FILE then env, then fallback
 if (!function_exists('getenv_docker')) {
-	// https://github.com/docker-library/wordpress/issues/588 (WP-CLI will load this file 2x)
-	function getenv_docker($env, $default) {
-		if ($fileEnv = getenv($env . '_FILE')) {
-			return rtrim(file_get_contents($fileEnv), "\r\n");
-		}
-		else if (($val = getenv($env)) !== false) {
-			return $val;
-		}
-		else {
-			return $default;
-		}
-	}
+    function getenv_docker($env, $default) {
+        if ($fileEnv = getenv($env . '_FILE')) {
+            return rtrim(file_get_contents($fileEnv), "\r\n");
+        }
+        else if (($val = getenv($env)) !== false) {
+            return $val;
+        }
+        else {
+            return $default;
+        }
+    }
 }
 
-// ** Database settings - You can get this info from your web host ** //
-/** The name of the database for WordPress */
 define( 'DB_NAME', getenv_docker('WORDPRESS_DB_NAME', 'wordpress') );
-
-/** Database username */
 define( 'DB_USER', getenv_docker('WORDPRESS_DB_USER', 'wordpress') );
-
-/** Database password */
 define( 'DB_PASSWORD', getenv_docker('WORDPRESS_DB_PASSWORD', 'wordpress_password') );
-
-/**
- * Docker image fallback values above are sourced from the official WordPress installation wizard:
- * https://github.com/WordPress/WordPress/blob/1356f6537220ffdc32b9dad2a6cdbe2d010b7a88/wp-admin/setup-config.php#L224-L238
- * (However, using "example username" and "example password" in your database is strongly discouraged.  Please use strong, random credentials!)
- */
-
-/** Database hostname */
 define( 'DB_HOST', 'wordpress-db-1');
-
-/** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8mb4' );
-
-/** The database collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE',  '' );
 
-/**#@+
- * Authentication unique keys and salts.
- *
- * Change these to different unique phrases! You can generate these using
- * the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}.
- *
- * You can change these at any point in time to invalidate all existing cookies.
- * This will force all users to have to log in again.
- *
- * @since 2.6.0
- */
-define( 'AUTH_KEY',         getenv_docker('WORDPRESS_AUTH_KEY',         '67704b530c2164676644e7a1bd57e312ff72bf8b') );
-define( 'SECURE_AUTH_KEY',  getenv_docker('WORDPRESS_SECURE_AUTH_KEY',  'fa744e785f577316461f467b95146aa9091a0b6b') );
-define( 'LOGGED_IN_KEY',    getenv_docker('WORDPRESS_LOGGED_IN_KEY',    'b52cbf998489da7b220e8c54373718d9f6109fa4') );
-define( 'NONCE_KEY',        getenv_docker('WORDPRESS_NONCE_KEY',        '97572c564dbed827597ff7285919ee6b27880946') );
-define( 'AUTH_SALT',        getenv_docker('WORDPRESS_AUTH_SALT',        'af532d7b877628e2c37390f6a5607de4b35ff78f') );
-define( 'SECURE_AUTH_SALT', getenv_docker('WORDPRESS_SECURE_AUTH_SALT', 'f7c8b248628848acc376a37fea2087f953c6a5e5') );
-define( 'LOGGED_IN_SALT',   getenv_docker('WORDPRESS_LOGGED_IN_SALT',   '175ff71ad45a077e72d4463d7f5e7ed110f15fb8') );
-define( 'NONCE_SALT',       getenv_docker('WORDPRESS_NONCE_SALT',       'abc331e5b25e290a0ced8a4f306853f3fa12ff04') );
-// (See also https://wordpress.stackexchange.com/a/152905/199287)
+/* Authentication keys and salts (examples) */
+define( 'AUTH_KEY', getenv_docker('WORDPRESS_AUTH_KEY', '...') );
+// -- additional salts omitted for brevity in this example --
 
-/**#@-*/
-
-/**
- * WordPress database table prefix.
- *
- * You can have multiple installations in one database if you give each
- * a unique prefix. Only numbers, letters, and underscores please!
- *
- * At the installation time, database tables are created with the specified prefix.
- * Changing this value after WordPress is installed will make your site think
- * it has not been installed.
- *
- * @link https://developer.wordpress.org/advanced-administration/wordpress/wp-config/#table-prefix
- */
 $table_prefix = getenv_docker('WORDPRESS_TABLE_PREFIX', 'wp_');
 
-/**
- * For developers: WordPress debugging mode.
- *
- * Change this to true to enable the display of notices during development.
- * It is strongly recommended that plugin and theme developers use WP_DEBUG
- * in their development environments.
- *
- * For information on other constants that can be used for debugging,
- * visit the documentation.
- *
- * @link https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/
- */
 define( 'WP_DEBUG', !!getenv_docker('WORDPRESS_DEBUG', '') );
 
-/* Add any custom values between this line and the "stop editing" line. */
-
-// If we're behind a proxy server and using HTTPS, we need to alert WordPress of that fact
-// see also https://wordpress.org/support/article/administration-over-ssl/#using-a-reverse-proxy
-if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strpos($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false) {
-	$_SERVER['HTTPS'] = 'on';
-}
-// (we include this by default because reverse proxying is extremely common in container environments)
-
-if ($configExtra = getenv_docker('WORDPRESS_CONFIG_EXTRA', '')) {
-	eval($configExtra);
-}
-
 define('FS_METHOD', 'direct');
-/* That's all, stop editing! Happy publishing. */
 
-/** Absolute path to the WordPress directory. */
 if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', __DIR__ . '/' );
+    define( 'ABSPATH', __DIR__ . '/' );
 }
 
-/** Sets up WordPress vars and included files. */
 require_once ABSPATH . 'wp-settings.php';
-
 ```
 
-Khởi chạy bằng lệnh sudo docker compose up -d —build
+Start the environment with:
 
-Sau khi dựng hoàn thành, truy cập [localhost:9000](http://localhost:9000) để thực hiện cài đặt wordpress 
+```powershell
+sudo docker compose up -d --build
+```
 
-Sau khi cài đặt xong, truy cập [localhost:9000/wp-admin](http://localhost:9000/wp-admin) để truy cập trang quản trị sau đó đăng nhập bằng tài khoản vừa tạo
+After the stack is up, visit http://localhost:9000 to complete the WordPress setup.
+
+Once installation is finished, log in at http://localhost:9000/wp-admin using the account you created during setup.
 
 ![image.png]({{ site.url }}/assets/images/setup/image.png)
 
-Thực hiện tải file zip plugin theo đường dẫn : [https://downloads.wordpress.org/plugin/{plugin-slug}.{version](https://downloads.wordpress.org/plugin/%7Bplugin-slug%7D.%7Bversion)}.zip. 
+To install a plugin from the official WordPress plugin repository, download the plugin zip at:
+`https://downloads.wordpress.org/plugin/{plugin-slug}.{version}.zip`.
 
-Ví dụ : với plugin ninja-forms v3.11.0 ta sẽ thực hiện tải tại  [https://downloads.wordpress.org/plugin/ninja-forms.](https://downloads.wordpress.org/plugin/%7Bplugin-slug%7D.%7Bversion)3.11.0.zip
+For example, to download ninja-forms v3.11.0 use:
+`https://downloads.wordpress.org/plugin/ninja-forms.3.11.0.zip`.
 
-Lưu ý: Chỉ các plugin miễn phí và được đăng tải lên trang chủ của wordpress mới có thể tải được bằng cách trên.
+Note: Only free plugins available on the official WordPress.org repository can be downloaded this way.
 
-Sau khi tải về file zip, truy cập plugin → cài plugin → Tải lên plugin dạng file zip để tiến hành cài đặt plugin. Sau khi cài đặt thành công, thực hiện kích hoạt plugin
+In the admin panel: Plugins → Add New → Upload Plugin (zip file) to install, then activate the plugin.
 
 ![image.png]({{ site.url }}/assets/images/setup/image-1.png)
 
-Khi cài đặt thành côn plugin, source code plugin sẽ được sinh ra tại thư mục 
-
-`/wordpress/wp-content/plugins/{plugin-slugs}`
+After activation, the plugin code will be available under:
+`/wordpress/wp-content/plugins/{plugin-slug}`
 
 ![image.png]({{ site.url }}/assets/images/setup/image-2.png)
 
-Các lỗ hổng liên quan đến plugin và phiên bản được tra cứu trên wpscan
+Vulnerabilities and plugin versions can be checked with WPScan.
